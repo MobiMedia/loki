@@ -43,7 +43,6 @@ func parseCWEvent(ctx context.Context, b *batch, ev *events.CloudwatchLogsEvent)
 	}
 
 	labels := model.LabelSet{
-		model.LabelName("app"):                  model.LabelValue("cloudwatch"),
 		model.LabelName("cloudwatch_log_group"): model.LabelValue(data.LogGroup),
 	}
 
@@ -61,10 +60,11 @@ func parseCWEvent(ctx context.Context, b *batch, ev *events.CloudwatchLogsEvent)
 		}
 	}
 
-	// Add "function" label if LogGroup starts with "/aws/lambda/"
 	if strings.HasPrefix(data.LogGroup, "/aws/lambda/") {
 		functionName := strings.TrimPrefix(data.LogGroup, "/aws/lambda/")
-		labels[model.LabelName("function")] = model.LabelValue(functionName)
+		labels[model.LabelName("app")] = model.LabelValue(functionName)
+	} else {
+		labels[model.LabelName("app")] = model.LabelValue("cloudwatch")
 	}
 
 	labels = applyLabels(labels)
